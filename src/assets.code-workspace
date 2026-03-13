@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "assets"
+		},
+		{
+			"path": "components"
+		},
+		{
+			"path": "lib"
+		},
+		{
+			"path": "pages"
+		},
+		{
+			"path": ".."
+		}
+	]
+}
