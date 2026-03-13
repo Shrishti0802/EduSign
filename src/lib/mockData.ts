@@ -28,7 +28,7 @@ export const mockDictionaryData: SignData[] = [
     id: '3',
     word: 'Please',
     category: 'Greetings',
-    videoUrl: 'https://cdn.pixabay.com/video/2020/05/17/39328-423455928_tiny.mp4',
+    videoUrl: '/videos/Please.mp4',
     difficulty: 'Beginner'
   },
   {

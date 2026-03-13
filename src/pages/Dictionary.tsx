@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Star, Gamepad2 } from 'lucide-react';
+import { Search, Filter, Gamepad2 } from 'lucide-react';
 import SignCard from '../components/SignCard';
 import VideoModal from '../components/VideoModal';
 import XPBar from '../components/XPBar';

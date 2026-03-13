@@ -1,206 +1,296 @@
 /**
  * signRecognizer.ts
- * 
- * Geometric ASL sign detection for MediaPipe hand landmarks.
- * 
+ *
+ * Pure geometric ASL sign detection using MediaPipe hand landmarks.
+ *
+ * Corrected shapes based on actual ASL:
+ *
+ * HELLO     — open palm, all 5 fingers extended and SPREAD, near forehead
+ * THANK YOU — curved/bent hand (fingers NOT fully extended), moves away from chin
+ * PLEASE    — flat open hand on chest, fingers extended and TOGETHER (not spread)
+ * YES       — closed fist, all fingers curled, thumb tucked, wrist bob
+ * NO        — index + middle extended (peace sign), ring + pinky curled
+ *
  * MediaPipe landmark indices:
  *   0: Wrist
- *   1-4: Thumb (1=CMC, 2=MCP, 3=IP, 4=tip)
- *   5-8: Index (5=MCP, 6=PIP, 7=DIP, 8=tip)
- *   9-12: Middle (9=MCP, 10=PIP, 11=DIP, 12=tip)
- *   13-16: Ring (13=MCP, 14=PIP, 15=DIP, 16=tip)
- *   17-20: Pinky (17=MCP, 18=PIP, 19=DIP, 20=tip)
+ *   1-4:  Thumb  (1=CMC, 2=MCP, 3=IP,  4=tip)
+ *   5-8:  Index  (5=MCP, 6=PIP, 7=DIP, 8=tip)
+ *   9-12: Middle (9=MCP,10=PIP,11=DIP,12=tip)
+ *   13-16:Ring   (13=MCP,14=PIP,15=DIP,16=tip)
+ *   17-20:Pinky  (17=MCP,18=PIP,19=DIP,20=tip)
  */
 
-interface Landmark {
+export interface Landmark {
     x: number;
     y: number;
     z: number;
 }
 
-// ─── Core geometric helpers ───────────────────────────────────────────────────
+// ─── Core helpers ─────────────────────────────────────────────────────────────
 
-/** Euclidean distance between two landmarks */
 function dist(a: Landmark, b: Landmark): number {
     return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
 }
 
 /**
- * Is a finger extended?
- * Compares the tip Y position against the PIP joint Y position.
- * In MediaPipe, Y increases downward — so a lower Y value = higher on screen = extended.
- * We use the MCP as an anchor to compute a normalized threshold.
+ * Finger fully extended — tip is well above PIP joint.
+ * threshold=0.7 means tip must be 70% of the MCP→PIP bone length above PIP.
  */
-function isFingerExtended(
-    tip: Landmark,
-    pip: Landmark,
-    mcp: Landmark,
-    threshold = 0.6 // fraction of MCP-PIP distance the tip must be above PIP
-): boolean {
-    // Vector from MCP to PIP (the "base" direction of the finger)
-    const mcpToPipY = pip.y - mcp.y;
-    // If tip is above PIP by at least `threshold * |mcpToPipY|`, it's extended
-    return pip.y - tip.y > Math.abs(mcpToPipY) * threshold;
-}
-
-/** Is the thumb extended? Uses a horizontal comparison since thumb extends sideways. */
-function isThumbExtended(landmarks: Landmark[]): boolean {
-    const wrist = landmarks[0];
-    const thumbTip = landmarks[4];
-    const thumbMcp = landmarks[2];
-    // Thumb tip should be noticeably farther from wrist than the thumb MCP
-    return dist(thumbTip, wrist) > dist(thumbMcp, wrist) * 1.3;
-}
-
-/** Returns [index, middle, ring, pinky] extended state */
-function getFingersExtended(lm: Landmark[]): [boolean, boolean, boolean, boolean] {
-    const index = isFingerExtended(lm[8], lm[6], lm[5]);
-    const middle = isFingerExtended(lm[12], lm[10], lm[9]);
-    const ring = isFingerExtended(lm[16], lm[14], lm[13]);
-    const pinky = isFingerExtended(lm[20], lm[18], lm[17]);
-    return [index, middle, ring, pinky];
+function isExtended(tip: Landmark, pip: Landmark, mcp: Landmark, threshold = 0.7): boolean {
+    const bone = Math.abs(pip.y - mcp.y);
+    return pip.y - tip.y > bone * threshold;
 }
 
 /**
- * Check how spread apart the extended fingers are.
- * "Hello" has fingers spread; "Thank You" has them together.
+ * Finger bent/curved — tip is only slightly above or at PIP level.
+ * This is the key shape for THANK YOU (fingers bent, not fully extended or curled).
  */
-function areFingersTogether(lm: Landmark[], spreadThreshold = 0.06): boolean {
-    // Compare adjacent fingertip distances
-    const idxToMid = dist(lm[8], lm[12]);
-    const midToRing = dist(lm[12], lm[16]);
-    const ringToPink = dist(lm[16], lm[20]);
-    // Use hand size (wrist to middle MCP) as a normalizing factor
-    const handScale = dist(lm[0], lm[9]);
-    const avgSpread = (idxToMid + midToMid + ringToPink) / 3 / handScale;
-
-    // suppress TS unused-var — midToMid is purposely replaced below
-    void midToRing;
-
-    const normalizedSpread = (idxToMid + midToRing + ringToPink) / 3 / handScale;
-    return normalizedSpread < spreadThreshold;
+function isBent(tip: Landmark, pip: Landmark, mcp: Landmark): boolean {
+    const bone = Math.abs(pip.y - mcp.y);
+    const tipAbovePip = pip.y - tip.y;
+    // Tip is a little above PIP but not fully extended
+    return tipAbovePip > bone * 0.1 && tipAbovePip < bone * 0.65;
 }
 
 /**
- * Is the palm roughly facing the camera?
- * We estimate this by checking that the knuckles (MCPs) form a roughly
- * horizontal line and that the wrist is below them (standard upright palm).
+ * Finger fully curled — tip is below or at PIP level.
  */
-function isPalmFacingCamera(lm: Landmark[]): boolean {
-    // The normal of the palm can be estimated from cross product, but a simpler
-    // proxy: the middle finger MCP (9) should have a lower Z than the wrist (0)
-    // when palm is facing camera. MediaPipe Z is depth — negative = closer.
-    return lm[9].z < lm[0].z + 0.05;
+function isCurled(tip: Landmark, pip: Landmark, mcp: Landmark, threshold = 0.15): boolean {
+    const bone = Math.abs(pip.y - mcp.y);
+    return pip.y - tip.y < bone * threshold;
 }
 
-// ─── Sign detectors ───────────────────────────────────────────────────────────
+function isThumbExtended(lm: Landmark[]): boolean {
+    return dist(lm[4], lm[0]) > dist(lm[2], lm[0]) * 1.3;
+}
+
+function isThumbCurled(lm: Landmark[]): boolean {
+    return dist(lm[4], lm[5]) < dist(lm[2], lm[0]) * 0.7;
+}
+
+/** [index, middle, ring, pinky] */
+function extendedFlags(lm: Landmark[]): [boolean, boolean, boolean, boolean] {
+    return [
+        isExtended(lm[8], lm[6], lm[5]),
+        isExtended(lm[12], lm[10], lm[9]),
+        isExtended(lm[16], lm[14], lm[13]),
+        isExtended(lm[20], lm[18], lm[17]),
+    ];
+}
+
+function curledFlags(lm: Landmark[]): [boolean, boolean, boolean, boolean] {
+    return [
+        isCurled(lm[8], lm[6], lm[5]),
+        isCurled(lm[12], lm[10], lm[9]),
+        isCurled(lm[16], lm[14], lm[13]),
+        isCurled(lm[20], lm[18], lm[17]),
+    ];
+}
+
+function bentFlags(lm: Landmark[]): [boolean, boolean, boolean, boolean] {
+    return [
+        isBent(lm[8], lm[6], lm[5]),
+        isBent(lm[12], lm[10], lm[9]),
+        isBent(lm[16], lm[14], lm[13]),
+        isBent(lm[20], lm[18], lm[17]),
+    ];
+}
 
 /**
- * HELLO (ASL)
- * Shape: Open palm, all 5 fingers fully extended and spread, palm faces outward.
- * Static proxy: all 4 fingers extended + thumb extended + fingers spread apart.
- *
- * Confidence scoring (0-1):
- *   +0.25 each finger extended (index, middle, ring, pinky)
- *   +0.25 thumb extended
- *   Penalty if fingers are too close together (more spread = better for Hello)
- *   Requires >= 0.85 to trigger
+ * Normalized spread between adjacent fingertips.
+ * > 0.09 = spread wide apart
+ * < 0.06 = fingers held together
  */
-function detectHello(lm: Landmark[]): number {
-    const [index, middle, ring, pinky] = getFingersExtended(lm);
+function fingerSpread(lm: Landmark[]): number {
+    const scale = dist(lm[0], lm[9]);
+    if (scale < 0.001) return 0;
+    return (dist(lm[8], lm[12]) + dist(lm[12], lm[16]) + dist(lm[16], lm[20])) / 3 / scale;
+}
+
+// ─── Sign scorers ─────────────────────────────────────────────────────────────
+
+/**
+ * HELLO
+ * Open palm — all 5 fingers fully EXTENDED and SPREAD wide.
+ * Distinctly different from Please (which is fingers together).
+ */
+function scoreHello(lm: Landmark[]): number {
+    const [ie, me, re, pe] = extendedFlags(lm);
     const thumb = isThumbExtended(lm);
+    const spread = fingerSpread(lm);
 
     let score = 0;
-    if (index) score += 0.2;
-    if (middle) score += 0.2;
-    if (ring) score += 0.2;
-    if (pinky) score += 0.2;
-    if (thumb) score += 0.2;
+    if (ie) score += 0.18;
+    if (me) score += 0.18;
+    if (re) score += 0.18;
+    if (pe) score += 0.18;
+    if (thumb) score += 0.18;
 
-    // Bonus: fingers should be spread (not together)
-    const handScale = dist(lm[0], lm[9]);
-    const spread = (dist(lm[8], lm[12]) + dist(lm[12], lm[16]) + dist(lm[16], lm[20])) / 3 / handScale;
-
-    // spread > 0.08 means nicely spread fingers (good for Hello)
-    // spread < 0.05 means fingers together (bad for Hello, good for Thank You)
-    if (spread > 0.08) score += 0.1;
-    else if (spread < 0.05) score -= 0.15; // penalty: looks like Thank You instead
+    // SPREAD is the key differentiator from Please
+    if (spread > 0.09) score += 0.12;
+    else if (spread < 0.06) score -= 0.25; // fingers together = Please not Hello
 
     return Math.max(0, Math.min(1, score));
 }
 
 /**
- * THANK YOU (ASL)
- * Shape: Flat hand, fingers extended and held TOGETHER, fingertips touch
- *        near lips/chin, then move outward. 
- * Static proxy we can detect: all 4 fingers extended + close together + 
- *        thumb may be tucked or loosely extended.
- *
- * Key differentiator from Hello: fingers are TOGETHER not spread.
- *
- * Confidence scoring (0-1):
- *   +0.20 each of index, middle, ring, pinky extended
- *   +0.20 fingers held close together
- *   Penalty if fingers are too spread (looks like Hello)
- *   Requires >= 0.75 to trigger (slightly lower since thumb varies)
+ * THANK YOU
+ * Curved/bent hand — fingers are BENT at the middle joints (not fully extended,
+ * not fully curled). Hand starts near chin and moves outward.
+ * Static proxy: most fingers bent rather than fully extended or fully curled.
  */
-function detectThankYou(lm: Landmark[]): number {
-    const [index, middle, ring, pinky] = getFingersExtended(lm);
+function scoreThankYou(lm: Landmark[]): number {
+    const [ib, mb, rb, pb] = bentFlags(lm);
+    const [ie, me, re, pe] = extendedFlags(lm);
+    const [ic, mc, rc, pc] = curledFlags(lm);
 
     let score = 0;
-    if (index) score += 0.2;
-    if (middle) score += 0.2;
-    if (ring) score += 0.2;
-    if (pinky) score += 0.2;
 
-    // Critical: fingers must be TOGETHER
-    const handScale = dist(lm[0], lm[9]);
-    const spread = (dist(lm[8], lm[12]) + dist(lm[12], lm[16]) + dist(lm[16], lm[20])) / 3 / handScale;
+    // Bent fingers are the core signal
+    if (ib) score += 0.22;
+    if (mb) score += 0.22;
+    if (rb) score += 0.18;
+    if (pb) score += 0.18;
 
-    if (spread < 0.07) {
-        score += 0.2; // Fingers are nicely together — strong Thank You signal
-    } else if (spread > 0.10) {
-        score -= 0.2; // Too spread — looks like Hello, penalise
-    }
+    // Penalty: fully extended fingers means Hello or Please, not Thank You
+    const fullyExtended = [ie, me, re, pe].filter(Boolean).length;
+    score -= fullyExtended * 0.10;
+
+    // Penalty: fully curled fingers means Yes/fist, not Thank You
+    const fullyCurled = [ic, mc, rc, pc].filter(Boolean).length;
+    score -= fullyCurled * 0.08;
 
     return Math.max(0, Math.min(1, score));
 }
 
-// ─── Stability buffer ─────────────────────────────────────────────────────────
+/**
+ * PLEASE
+ * Flat open hand pressed against chest — fingers fully EXTENDED and TOGETHER.
+ * Key differences:
+ *   vs Hello: fingers TOGETHER (low spread), hand lower/against body
+ *   vs Thank You: fingers FULLY extended, not bent
+ */
+function scorePlease(lm: Landmark[]): number {
+    const [ie, me, re, pe] = extendedFlags(lm);
+    const spread = fingerSpread(lm);
+    const [ib, mb, rb, pb] = bentFlags(lm);
+
+    let score = 0;
+    if (ie) score += 0.20;
+    if (me) score += 0.20;
+    if (re) score += 0.20;
+    if (pe) score += 0.20;
+
+    // TOGETHER is the key differentiator from Hello
+    if (spread < 0.07) score += 0.20;
+    else if (spread > 0.09) score -= 0.25; // too spread = Hello, not Please
+
+    // Penalty for bent fingers (that's Thank You shape)
+    const bentCount = [ib, mb, rb, pb].filter(Boolean).length;
+    score -= bentCount * 0.08;
+
+    return Math.max(0, Math.min(1, score));
+}
 
 /**
- * We require the sign to be held consistently for N consecutive frames
- * before we accept it. This eliminates false positives from transient poses.
+ * YES
+ * Tight closed fist — ALL fingers curled AND thumb tucked in.
+ * Key differentiator from Please: nothing is extended.
  */
-const REQUIRED_HOLD_FRAMES = 15; // ~0.5 seconds at 30fps
-const DETECTION_THRESHOLD_HELLO = 0.85;
-const DETECTION_THRESHOLD_THANKYOU = 0.75;
+function scoreYes(lm: Landmark[]): number {
+    const [ic, mc, rc, pc] = curledFlags(lm);
+    const thumbCurled = isThumbCurled(lm);
+    const thumbExtended = isThumbExtended(lm);
+    const [ie, me, re, pe] = extendedFlags(lm);
 
-const frameBuffer: { sign: string | null; count: number } = {
-    sign: null,
-    count: 0,
+    let score = 0;
+    if (ic) score += 0.18;
+    if (mc) score += 0.18;
+    if (rc) score += 0.18;
+    if (pc) score += 0.18;
+    if (thumbCurled) score += 0.18;
+
+    if (thumbExtended) score -= 0.30;
+    const extCount = [ie, me, re, pe].filter(Boolean).length;
+    score -= extCount * 0.15;
+
+    return Math.max(0, Math.min(1, score));
+}
+
+/**
+ * NO
+ * Peace/victory sign — EXACTLY index + middle extended, ring + pinky curled.
+ */
+function scoreNo(lm: Landmark[]): number {
+    const [ie, me, re, pe] = extendedFlags(lm);
+    const [_ic, _mc, rc, pc] = curledFlags(lm);
+    const thumbCurled = isThumbCurled(lm);
+
+    let score = 0;
+    if (ie) score += 0.25;
+    if (me) score += 0.25;
+    if (rc) score += 0.20;
+    if (pc) score += 0.20;
+    if (thumbCurled) score += 0.10;
+
+    // Hard penalties — ring or pinky extended means it's not No
+    if (re) score -= 0.40;
+    if (pe) score -= 0.40;
+
+    return Math.max(0, Math.min(1, score));
+}
+
+// ─── Thresholds ───────────────────────────────────────────────────────────────
+
+const THRESHOLDS: Record<string, number> = {
+    Hello: 0.78,
+    ThankYou: 0.55, // lower because bent detection is softer than extended/curled
+    Please: 0.75,
+    Yes: 0.70,
+    No: 0.75,
 };
 
-/**
- * Main exported function.
- * Returns the detected sign name if held for enough frames, otherwise null.
- */
+const DISPLAY_NAMES: Record<string, string> = {
+    Hello: 'Hello',
+    ThankYou: 'Thank You',
+    Please: 'Please',
+    Yes: 'Yes',
+    No: 'No',
+};
+
+// ─── Stability buffer ─────────────────────────────────────────────────────────
+// Sign must score above threshold for N consecutive frames to fire.
+// Prevents false positives from transient hand positions.
+
+const REQUIRED_HOLD_FRAMES = 18; // ~0.6s at 30fps
+const frameBuffer = { sign: null as string | null, count: 0 };
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
 export function detectSign(landmarks: Landmark[]): string | null {
     if (!landmarks || landmarks.length < 21) return null;
 
-    const helloScore = detectHello(landmarks);
-    const thankYouScore = detectThankYou(landmarks);
+    const scores: Record<string, number> = {
+        Hello: scoreHello(landmarks),
+        ThankYou: scoreThankYou(landmarks),
+        Please: scorePlease(landmarks),
+        Yes: scoreYes(landmarks),
+        No: scoreNo(landmarks),
+    };
 
-    // Determine the candidate sign this frame
-    let candidateSign: string | null = null;
-
-    if (helloScore >= DETECTION_THRESHOLD_HELLO && helloScore > thankYouScore) {
-        candidateSign = 'Hello';
-    } else if (thankYouScore >= DETECTION_THRESHOLD_THANKYOU && thankYouScore > helloScore) {
-        candidateSign = 'Thank You';
+    // Pick highest scorer that clears its threshold
+    let bestKey: string | null = null;
+    let bestScore = 0;
+    for (const [key, score] of Object.entries(scores)) {
+        if (score >= THRESHOLDS[key] && score > bestScore) {
+            bestScore = score;
+            bestKey = key;
+        }
     }
 
-    // Stability: must be same sign for REQUIRED_HOLD_FRAMES in a row
+    const candidateSign = bestKey ? DISPLAY_NAMES[bestKey] : null;
+
+    // Stability gate
     if (candidateSign === frameBuffer.sign) {
         frameBuffer.count++;
     } else {
@@ -209,7 +299,6 @@ export function detectSign(landmarks: Landmark[]): string | null {
     }
 
     if (frameBuffer.count >= REQUIRED_HOLD_FRAMES && candidateSign !== null) {
-        // Reset so the same sign doesn't fire again immediately
         frameBuffer.count = 0;
         frameBuffer.sign = null;
         return candidateSign;
@@ -218,13 +307,20 @@ export function detectSign(landmarks: Landmark[]): string | null {
     return null;
 }
 
-/** 
- * Debug helper — call this in your render loop to see live scores in the console.
- * Remove in production.
- */
 export function debugScores(landmarks: Landmark[]): void {
     if (!landmarks || landmarks.length < 21) return;
-    const h = detectHello(landmarks);
-    const t = detectThankYou(landmarks);
-    console.log(`[SignDebug] Hello: ${(h * 100).toFixed(0)}%  ThankYou: ${(t * 100).toFixed(0)}%`);
+    const s = {
+        Hello: scoreHello(landmarks),
+        ThankYou: scoreThankYou(landmarks),
+        Please: scorePlease(landmarks),
+        Yes: scoreYes(landmarks),
+        No: scoreNo(landmarks),
+    };
+    console.log(
+        `[SignDebug] Hello:${(s.Hello * 100).toFixed(0)}%` +
+        ` | TY:${(s.ThankYou * 100).toFixed(0)}%` +
+        ` | Please:${(s.Please * 100).toFixed(0)}%` +
+        ` | Yes:${(s.Yes * 100).toFixed(0)}%` +
+        ` | No:${(s.No * 100).toFixed(0)}%`
+    );
 }
