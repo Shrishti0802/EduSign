@@ -14,14 +14,14 @@ export const mockDictionaryData: SignData[] = [
     id: '1',
     word: 'Hello',
     category: 'Greetings',
-    videoUrl: 'https://cdn.pixabay.com/video/2020/05/17/39328-423455928_tiny.mp4',
+    videoUrl: '/videos/Hello.mp4',
     difficulty: 'Beginner'
   },
   {
     id: '2',
     word: 'Thank You',
     category: 'Greetings',
-    videoUrl: 'https://cdn.pixabay.com/video/2021/08/17/85352-590001928_tiny.mp4',
+    videoUrl: '/videos/Thank You.mp4',
     difficulty: 'Beginner'
   },
   {
