@@ -1,73 +1,74 @@
-# React + TypeScript + Vite
+# EduSign - Sign Language Learning Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+EduSign is a comprehensive, interactive web application designed to bridge the communication gap between hearing and deaf communities. It empowers users to learn sign language through intuitive lessons, real-time AI feedback, and interactive practice experiences.
 
-Currently, two official plugins are available:
+![EduSign Banner](https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=2070)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- **Video Dictionary**: A curated collection of common sign language gestures with high-quality video demonstrations.
+- **AI-Powered Practice**: Real-time hand landmark detection and gesture recognition using Google's MediaPipe, providing instant feedback on your signs.
+- **Interactive Quizzes**: Test your knowledge with dynamically generated quizzes that use separate, text-free videos and 3D avatar assets.
+- **Dynamic Progress Tracking**: Earn XP, level up, and maintain streaks as you learn. Your progress is persisted across sessions.
+- **Offline Support (PWA)**: Install EduSign on your device and use it anywhere, even without an internet connection.
+- **Custom Aesthetic**: A beautiful, warm dark theme designed for focus and readability.
+- **Complete Auth Flow**: Secure login and signup pages to personalize your learning journey.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Vanilla CSS with custom variables and glassmorphism
+- **AI/ML**: MediaPipe Tasks Vision (Hand Landmarker)
+- **Icons**: Lucide React
+- **Routing**: React Router DOM
+- **Persistence**: LocalStorage (Redux/Context API patterns)
+- **Offline**: Vite PWA Plugin (Service Workers)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📦 Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+To get EduSign running locally, follow these steps:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Shrishti0802/EduSign.git
+   cd EduSign
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+3. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+4. **Build for production**:
+   ```bash
+   npm run build
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📱 Progressive Web App (PWA)
+
+EduSign is optimized as a PWA. To install it:
+1. Open the app in a supported browser (Chrome, Safari, Edge).
+2. Click the "Add to Home Screen" or "Install" prompt in the address bar or share menu.
+3. The app will now work offline, including the AI Practice feature (after initial model caching).
+
+## 🌐 Deployment
+
+EduSign is deployment-ready and can be hosted on platforms like Vercel, Netlify, or GitHub Pages.
+
+### Deploying to Vercel
+1. Connect your GitHub account to Vercel.
+2. Select the `EduSign` repository.
+3. Click "Deploy".
+
+## 🤝 Contributing
+
+Contributions are welcome! If you'd like to improve EduSign, feel free to fork the repository and submit a pull request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
