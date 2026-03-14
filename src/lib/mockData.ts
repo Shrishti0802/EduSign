@@ -33,37 +33,30 @@ export const mockDictionaryData: SignData[] = [
   },
   {
     id: '4',
-    word: 'Friend',
+    word: 'Family',
     category: 'People',
-    videoUrl: 'https://cdn.pixabay.com/video/2021/08/17/85352-590001928_tiny.mp4',
+    videoUrl: '/videos/Family.mp4',
     difficulty: 'Intermediate'
   },
   {
     id: '5',
-    word: 'Family',
-    category: 'People',
-    videoUrl: 'https://cdn.pixabay.com/video/2020/05/17/39328-423455928_tiny.mp4',
+    word: 'Good Morning',
+    category: 'Greetings',
+    videoUrl: '/videos/Good Morning.mp4',
     difficulty: 'Beginner'
   },
   {
     id: '6',
-    word: 'Water',
-    category: 'Food & Drink',
-    videoUrl: 'https://cdn.pixabay.com/video/2021/08/17/85352-590001928_tiny.mp4',
+    word: 'Music',
+    category: 'Common Verbs',
+    videoUrl: '/videos/music.mp4',
     difficulty: 'Beginner'
   },
   {
     id: '7',
-    word: 'Help',
-    category: 'Common Verbs',
-    videoUrl: 'https://cdn.pixabay.com/video/2020/05/17/39328-423455928_tiny.mp4',
-    difficulty: 'Intermediate'
-  },
-  {
-    id: '8',
-    word: 'Learn',
+    word: 'Numbers',
     category: 'Education',
-    videoUrl: 'https://cdn.pixabay.com/video/2021/08/17/85352-590001928_tiny.mp4',
+    videoUrl: '/videos/Numbers.mp4',
     difficulty: 'Intermediate'
   }
 ];

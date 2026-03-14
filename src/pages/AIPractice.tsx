@@ -82,7 +82,7 @@ const AIPractice = () => {
   const [completedAll, setCompletedAll] = useState(false);
   const [success, setSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-  const [sampleCounts, setSampleCounts] = useState<Record<string, number>>({});
+  const [sampleCounts, setSampleCounts] = useState<Record<string, number>>(knnClassifier.getCountsByLabel());
   const [isRecording, setIsRecording] = useState(false);
   const [activeLabel, setActiveLabel] = useState('');
   // Which group is shown in training panel: 'original' | 'new'

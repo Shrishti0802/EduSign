@@ -16,7 +16,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 const QuizSession: React.FC<QuizSessionProps> = ({ signs, gameState, onClose }) => {
-  const questions = shuffle(signs).slice(0, Math.min(signs.length, 6));
+  const [questions] = useState(() => shuffle(signs).slice(0, Math.min(signs.length, 6)));
   const [index, setIndex] = useState(0);
   const [guess, setGuess] = useState('');
   const [state, setState] = useState<QuizState>('question');

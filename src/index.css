@@ -1,26 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Colors - Dark Mode Glassmorphism Theme */
-  --bg-primary: #0f172a;      /* Deep Slate */
-  --bg-secondary: #1e293b;    /* Slate */
-  --bg-glass: rgba(30, 41, 59, 0.7);
-  --bg-glass-hover: rgba(51, 65, 85, 0.8);
+  /* Colors - Dark Warm Theme (darker versions of #F4F0E4, #44A194, #537D96, #EC8F8D) */
+  --bg-primary: #1a1814;      /* Deep Warm Dark (darkened cream) */
+  --bg-secondary: #252219;    /* Dark Warm Brown */
+  --bg-glass: rgba(38, 34, 26, 0.75); /* Translucent warm dark cards */
+  --bg-glass-hover: rgba(50, 45, 36, 0.85);
   
-  --accent-primary: #3b82f6;  /* Vivid Blue */
-  --accent-secondary: #8b5cf6; /* Vivid Purple */
+  --accent-primary: #3a8c80;  /* Darkened Teal (from #44A194) */
+  --accent-secondary: #d4736f; /* Darkened Coral (from #EC8F8D) */
+  --accent-tertiary: #3f6070;  /* Darkened Slate Blue (from #537D96) */
+  
   --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-inverse: #0f172a;
+  --text-primary: #f0ebe0;    /* Warm White (from #F4F0E4) - slightly muted */
+  --text-secondary: #a09880;  /* Muted Warm Gray */
+  --text-inverse: #1a1814;    /* Dark text for light elements */
   
-  --border-color: rgba(255, 255, 255, 0.1);
-  --border-highlight: rgba(255, 255, 255, 0.2);
+  --border-color: rgba(63, 96, 112, 0.25); /* Soft teal-blue border */
+  --border-highlight: rgba(63, 96, 112, 0.45);
 
   /* Shadows */
-  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.5);
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-glow: 0 0 20px rgba(58, 140, 128, 0.3); /* Teal glow */
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.45); /* Deeper shadow for dark mode */
 
   /* Typography */
   --font-main: 'Outfit', sans-serif;

@@ -5,7 +5,6 @@ const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: <Home size={20} /> },
     { name: 'Dictionary', path: '/dictionary', icon: <Library size={20} /> },
-    { name: 'Lessons', path: '/lessons', icon: <GraduationCap size={20} /> },
     { name: 'AI Practice', path: '/practice', icon: <Video size={20} /> },
   ];
 

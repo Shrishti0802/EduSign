@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Dictionary from './pages/Dictionary';
-import Lessons from './pages/Lessons';
 import AIPractice from './pages/AIPractice';
 import './App.css';
 
@@ -23,7 +22,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/dictionary" element={<Dictionary />} />
-            <Route path="/lessons" element={<Lessons />} />
             <Route path="/practice" element={<AIPractice />} />
           </Routes>
         </main>

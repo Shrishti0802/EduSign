@@ -1,22 +1,25 @@
 import { Play, TrendingUp, BookOpen, Clock, Activity, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useGameState } from '../lib/gameState';
 
 const Dashboard = () => {
+  const gameState = useGameState();
+
   const stats = [
-    { label: 'Signs Learned', value: '124', icon: <BookOpen className="text-gradient" size={24} />, trend: '+12 this week' },
-    { label: 'Current Streak', value: '5 Days', icon: <TrendingUp className="text-gradient" size={24} />, trend: 'Keep it up!' },
-    { label: 'Practice Time', value: '4.2 hrs', icon: <Clock className="text-gradient" size={24} />, trend: '+1.5 hrs this week' },
-    { label: 'Accuracy', value: '89%', icon: <Activity className="text-gradient" size={24} />, trend: 'Top 15% of learners' },
+    { label: 'Signs Learned', value: gameState.learnedSigns.size.toString(), icon: <BookOpen className="text-gradient" size={24} />, trend: 'Keep growing!' },
+    { label: 'Current Streak', value: `${gameState.streak} Days`, icon: <TrendingUp className="text-gradient" size={24} />, trend: 'Keep it up!' },
+    { label: 'Total XP', value: gameState.xp.toString(), icon: <Clock className="text-gradient" size={24} />, trend: `Level ${gameState.level}` },
+    { label: 'Current Level', value: gameState.level.toString(), icon: <Activity className="text-gradient" size={24} />, trend: 'Keep practicing!' },
   ];
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '2rem' }}>
       <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome back, <span className="text-gradient">Alex!</span> 👋</h1>
+          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome back, <span className="text-gradient">Learner!</span> 👋</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Ready to continue your sign language journey today?</p>
         </div>
-        <div className="badge">Intermediate Level</div>
+        <div className="badge">Level {gameState.level}</div>
       </header>
 
       {/* Stats Grid */}
@@ -48,8 +51,8 @@ const Dashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         <section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.5rem' }}>Continue Learning</h2>
-            <Link to="/lessons" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}>View All</Link>
+            <h2 style={{ fontSize: '1.5rem' }}>Recent Dictionary Additions</h2>
+            <Link to="/dictionary" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}>View Dictionary</Link>
           </div>
           
           <div className="glass-card" style={{ 
@@ -57,7 +60,7 @@ const Dashboard = () => {
             display: 'flex', 
             gap: '2rem', 
             alignItems: 'center',
-            background: 'linear-gradient(145deg, var(--bg-glass), rgba(59, 130, 246, 0.05))'
+            background: 'linear-gradient(145deg, var(--bg-glass), rgba(16, 185, 129, 0.05))'
           }}>
             <div style={{ 
               width: '120px', 
@@ -70,28 +73,19 @@ const Dashboard = () => {
               position: 'relative',
               overflow: 'hidden'
             }}>
-               <img src="https://images.unsplash.com/photo-1527525443983-6e60c75fff50?auto=format&fit=crop&q=80&w=300" alt="lesson thumbnail" style={{width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6}} />
-               <div style={{position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,0.8), transparent)'}}></div>
-               <Play size={32} color="white" style={{position: 'absolute'}} />
+               <div style={{ fontSize: '4rem' }}>👋</div>
             </div>
             
             <div style={{ flex: 1 }}>
-              <div className="badge" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>Module 4</div>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Common Greetings & Phrases</h3>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                Master the essential phrases for everyday conversation. Perfect your hand shape and motion.
+              <div className="badge" style={{ display: 'inline-block', marginBottom: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}>New Signs</div>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Greetings & People</h3>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '0', lineHeight: 1.5 }}>
+                New signs like "Friend", "Family", and "Water" have been added to the dictionary. Check them out!
               </p>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ flex: 1, height: '6px', background: 'var(--bg-secondary)', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{ width: '65%', height: '100%', background: 'var(--accent-gradient)' }}></div>
-                </div>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>65%</span>
-              </div>
             </div>
             
-            <Link to="/lessons">
-              <button className="btn-primary">Resume Lesson</button>
+            <Link to="/dictionary">
+              <button className="btn-primary" style={{ background: 'var(--accent-secondary)' }}>Learn Now</button>
             </Link>
           </div>
         </section>
