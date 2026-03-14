@@ -1,4 +1,4 @@
-import { Play, TrendingUp, BookOpen, Clock, Activity, Video } from 'lucide-react';
+import { TrendingUp, BookOpen, Clock, Activity, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGameState } from '../lib/gameState';
 
