@@ -1,9 +1,16 @@
-import { NavLink } from 'react-router-dom';
-import { Home, Library, GraduationCap, Video, Settings } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Home, Library, Video, LogOut } from 'lucide-react';
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('edusign_loggedIn');
+    navigate('/');
+  };
+
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: <Home size={20} /> },
+    { name: 'Dashboard', path: '/dashboard', icon: <Home size={20} /> },
     { name: 'Dictionary', path: '/dictionary', icon: <Library size={20} /> },
     { name: 'AI Practice', path: '/practice', icon: <Video size={20} /> },
   ];
@@ -60,21 +67,27 @@ const Sidebar = () => {
       </nav>
 
       <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-        <button style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          width: '100%',
-          padding: '12px 16px',
-          background: 'transparent',
-          color: 'var(--text-secondary)',
-          border: 'none',
-          cursor: 'pointer',
-          borderRadius: '12px',
-          textAlign: 'left'
-        }}>
-          <Settings size={20} />
-          Settings
+        <button
+          onClick={handleLogout}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            width: '100%',
+            padding: '12px 16px',
+            background: 'transparent',
+            color: 'var(--text-secondary)',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius: '12px',
+            textAlign: 'left',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e: any) => { e.currentTarget.style.color = '#d4736f'; e.currentTarget.style.background = 'rgba(212,115,111,0.1)'; }}
+          onMouseLeave={(e: any) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
+        >
+          <LogOut size={20} />
+          Log Out
         </button>
       </div>
     </aside>

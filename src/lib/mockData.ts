@@ -2,7 +2,8 @@ export interface SignData {
   id: string;
   word: string;
   category: string;
-  videoUrl: string;
+  videoUrl: string;       // Used in the Dictionary
+  quizVideoUrl?: string;  // Optional: used in the Quiz (falls back to videoUrl if not set)
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
 }
 
@@ -15,6 +16,7 @@ export const mockDictionaryData: SignData[] = [
     word: 'Hello',
     category: 'Greetings',
     videoUrl: '/videos/Hello.mp4',
+    quizVideoUrl: '/videos/hello(1).mp4',
     difficulty: 'Beginner'
   },
   {
@@ -22,6 +24,7 @@ export const mockDictionaryData: SignData[] = [
     word: 'Thank You',
     category: 'Greetings',
     videoUrl: '/videos/Thank You.mp4',
+    quizVideoUrl: '/videos/thankyou(1).mp4',
     difficulty: 'Beginner'
   },
   {
@@ -29,6 +32,7 @@ export const mockDictionaryData: SignData[] = [
     word: 'Please',
     category: 'Greetings',
     videoUrl: '/videos/Please.mp4',
+    quizVideoUrl: '/videos/Please(1).mp4',
     difficulty: 'Beginner'
   },
   {
@@ -36,6 +40,7 @@ export const mockDictionaryData: SignData[] = [
     word: 'Family',
     category: 'People',
     videoUrl: '/videos/Family.mp4',
+    quizVideoUrl: '/videos/Family(1).mp4',
     difficulty: 'Intermediate'
   },
   {
@@ -43,6 +48,7 @@ export const mockDictionaryData: SignData[] = [
     word: 'Good Morning',
     category: 'Greetings',
     videoUrl: '/videos/Good Morning.mp4',
+    quizVideoUrl: '/videos/goodmorning(1).mp4',
     difficulty: 'Beginner'
   },
   {
@@ -50,6 +56,7 @@ export const mockDictionaryData: SignData[] = [
     word: 'Music',
     category: 'Common Verbs',
     videoUrl: '/videos/music.mp4',
+    quizVideoUrl: '/videos/music(1).mp4',
     difficulty: 'Beginner'
   },
   {

@@ -4,6 +4,8 @@ import { useGameState } from '../lib/gameState';
 
 const Dashboard = () => {
   const gameState = useGameState();
+  const storedUser = localStorage.getItem('edusign_user');
+  const userName = storedUser ? JSON.parse(storedUser).name : 'Learner';
 
   const stats = [
     { label: 'Signs Learned', value: gameState.learnedSigns.size.toString(), icon: <BookOpen className="text-gradient" size={24} />, trend: 'Keep growing!' },
@@ -16,7 +18,7 @@ const Dashboard = () => {
     <div className="animate-fade-in" style={{ paddingBottom: '2rem' }}>
       <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome back, <span className="text-gradient">Learner!</span> 👋</h1>
+          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome back, <span className="text-gradient">{userName}!</span> 👋</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Ready to continue your sign language journey today?</p>
         </div>
         <div className="badge">Level {gameState.level}</div>

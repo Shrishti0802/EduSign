@@ -180,7 +180,7 @@ const QuizSession: React.FC<QuizSessionProps> = ({ signs, gameState, onClose }) 
         <div style={{ background: '#000', position: 'relative' }}>
           <video
             ref={videoRef}
-            src={current.videoUrl}
+            src={current.quizVideoUrl || current.videoUrl}
             autoPlay loop playsInline
             style={{ width: '100%', maxHeight: '380px', objectFit: 'contain', display: 'block' }}
           />
